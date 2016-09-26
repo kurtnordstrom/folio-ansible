@@ -25,6 +25,10 @@ folio-org/okapi repository. Depends on okapi-src.
 Clones the folio-org/mod-auth repository from GitHub, builds and
 deploys the modules. Depends on okapi-src.
 
+## folio-sample-modules-src
+Clones the folio-org/folio-sample-modules repository from GitHub,
+builds and deploys the modules. Depends on okapi-src and okapi-test.
+
 ## raml-module-builder
 Clones the folio-org/raml-module-builder repository from GitHub,
 builds the code. Depends on openjdk-8 and maven-3. Not strictly

@@ -4,5 +4,9 @@
 # Vagrantfile puts default VM into this group
 - hosts: dev
   roles:
-    - okapi-test
-    - mod-auth-src
+    # - okapi-src
+    # - okapi-test
+    - folio-sample-modules-src 
+    # - mod-auth-src
+    # - raml-module-builder
+    # - docker-engine

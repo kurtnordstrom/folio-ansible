@@ -18,6 +18,9 @@ okapi_home: /opt/okapi
 # mod-auth-src role
 mod_auth_src_home: /opt/mod-auth-src
 
+# folio-sample-modules-src role
+folio_sample_modules_src_home: /opt/folio-sample-modules-src
+
 # raml-module-builder role
 raml_module_builder_home: /opt/raml-module-builder
 

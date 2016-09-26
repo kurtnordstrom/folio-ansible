@@ -1,0 +1,19 @@
+{
+  "id" : "hello",
+  "name" : "Hello World",
+  "provides" : [ {
+    "id" : "hello",
+    "version" : "1.1.1"
+  } ],
+  "routingEntries" : [ {
+    "methods" : [ "GET", "POST" ],
+    "path" : "/hello",
+    "level" : "30",
+    "type" : "request-response",
+    "permissionsRequired" : [ ],
+    "permissionsDesired" : [ ]
+  } ],
+  "launchDescriptor" : {
+    "exec" : "java -Dport=%p -jar {{ folio_sample_modules_src_home }}/hello-vertx/target/folio-hello-vertx-fat.jar"
+  }
+}

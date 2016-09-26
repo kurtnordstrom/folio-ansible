@@ -40,7 +40,7 @@
 
 - name: Launch okapi-core
   become: yes
-  shell: nohup java -jar {{ okapi_home }}/lib/okapi-core-fat.jar dev > {{ okapi_home }}/logs/okapi.log &
+  shell: nohup java -jar -Dloglevel=DEBUG {{ okapi_home }}/lib/okapi-core-fat.jar dev > {{ okapi_home }}/logs/okapi.log &
   when: okapi_check.stdout.find('java') == -1
   register: okapi_launch
 

@@ -1,0 +1,47 @@
+---
+# Role to build and deploy folio-sample-modules from source
+- name: Clone folio-sample-modules repository
+  git: repo=https://github.com/folio-org/folio-sample-modules.git dest={{ folio_sample_modules_src_home }}
+
+- name: Build hello-vertx
+  shell: /usr/bin/mvn -q clean install > install.log
+  args:
+    chdir: "{{ folio_sample_modules_src_home }}/hello-vertx"
+    creates: "{{ folio_sample_modules_src_home }}/hello-vertx/install.log"
+
+- name: Check hello-vertx module registration
+  uri:
+    url: http://localhost:9130/_/proxy/modules/hello
+    status_code: 200, 404
+  register: hello_vertx_reg_status
+
+- name: Register hello-vertx module
+  uri:
+    url: http://localhost:9130/_/proxy/modules
+    method: POST
+    body_format: json
+    body: "{{ lookup('template', 'ModuleDescriptor-hello-vertx.json.j2') }}"
+    status_code: 201
+  when: hello_vertx_reg_status.status == 404
+
+- name: Check hello-vertx module deployment
+  uri:
+    url: http://localhost:9130/_/discovery/modules/hello
+    status_code: 200, 404
+  register: hello_vertx_deploy_status
+
+- name: Deploy hello-vertx module
+  uri:
+    url: http://localhost:9130/_/discovery/modules
+    method: POST
+    HEADER_Content-Type: application/json
+    body: '{ "srvcId" : "hello", "nodeId" : "localhost" }'
+    status_code: 201
+  when: hello_vertx_deploy_status.status == 404
+
+- name: Enable hello-vertx for testlib tenant
+  uri:
+    url: http://localhost:9130/_/proxy/tenants/testlib/modules
+    method: POST
+    body_format: json
+    body: '{ "id" : "hello" }'
