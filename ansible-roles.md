@@ -23,7 +23,11 @@ folio-org/okapi repository. Depends on okapi-src.
 
 ## mod-auth-src
 Clones the folio-org/mod-auth repository from GitHub, builds and
-deploys the modules. Depends on okapi-src.
+deploys the modules. Depends on mongodb-org and okapi-src.
+
+## mongodb-org
+Installs a more recent MongoDB Community Edition from the Mongo
+repository.
 
 ## folio-sample-modules-src
 Clones the folio-org/folio-sample-modules repository from GitHub,
