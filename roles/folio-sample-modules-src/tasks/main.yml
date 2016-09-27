@@ -1,47 +1,70 @@
 ---
 # Role to build and deploy folio-sample-modules from source
+# Note: temporarily set update=no to allow simple-vertx build to work
 - name: Clone folio-sample-modules repository
-  git: repo=https://github.com/folio-org/folio-sample-modules.git dest={{ folio_sample_modules_src_home }}
+  git: repo=https://github.com/folio-org/folio-sample-modules.git dest={{ folio_sample_modules_src_home }} update=no
 
-- name: Build hello-vertx
+# Temporary hack to simple-vertx pom.xml
+- name: Update simple-vertx pom.xml
+  copy: src=simple-vertx-pom.xml dest={{ folio_sample_modules_src_home }}/simple-vertx/pom.xml backup=yes
+
+- name: Build Java sample modules
   shell: /usr/bin/mvn -q clean install > install.log
   args:
-    chdir: "{{ folio_sample_modules_src_home }}/hello-vertx"
-    creates: "{{ folio_sample_modules_src_home }}/hello-vertx/install.log"
+    chdir: "{{ folio_sample_modules_src_home }}/{{ item }}"
+    creates: "{{ folio_sample_modules_src_home }}/{{ item }}/install.log"
+  with_items:
+    - hello-vertx
+    - simple-vertx
 
-- name: Check hello-vertx module registration
+- name: Check sample module registration
   uri:
-    url: http://localhost:9130/_/proxy/modules/hello
+    url: http://localhost:9130/_/proxy/modules/{{ item }}
     status_code: 200, 404
-  register: hello_vertx_reg_status
+  register: sample_reg_status
+  with_items:
+    - hello
+    - simple
 
-- name: Register hello-vertx module
+- name: Register sample modules
   uri:
     url: http://localhost:9130/_/proxy/modules
     method: POST
     body_format: json
-    body: "{{ lookup('template', 'ModuleDescriptor-hello-vertx.json.j2') }}"
+    body: "{{ lookup('template', item.template) }}"
     status_code: 201
-  when: hello_vertx_reg_status.status == 404
+  when: sample_reg_status.results[item.index].status == 404
+  with_items:
+    - { template: ModuleDescriptor-hello-vertx.json.j2, index: 0 }
+    - { template: ModuleDescriptor-simple-vertx.json.j2, index: 1 }
 
-- name: Check hello-vertx module deployment
+- name: Check sample module deployment
   uri:
-    url: http://localhost:9130/_/discovery/modules/hello
+    url: http://localhost:9130/_/discovery/modules/{{ item }}
     status_code: 200, 404
-  register: hello_vertx_deploy_status
+  register: sample_deploy_status
+  with_items:
+    - hello
+    - simple
 
-- name: Deploy hello-vertx module
+- name: Deploy sample modules
   uri:
     url: http://localhost:9130/_/discovery/modules
     method: POST
-    HEADER_Content-Type: application/json
-    body: '{ "srvcId" : "hello", "nodeId" : "localhost" }'
+    body_format: json
+    body: '{ "srvcId" : "{{ item.module }}", "nodeId" : "localhost" }'
     status_code: 201
-  when: hello_vertx_deploy_status.status == 404
+  when: sample_deploy_status.results[item.index].status == 404
+  with_items:
+    - { module: hello, index: 0 }
+    - { module: simple, index: 1 }
 
-- name: Enable hello-vertx for testlib tenant
+- name: Enable sample modules for testlib tenant
   uri:
     url: http://localhost:9130/_/proxy/tenants/testlib/modules
     method: POST
     body_format: json
-    body: '{ "id" : "hello" }'
+    body: '{ "id" : "{{ item }}" }'
+  with_items:
+    - hello
+    - simple
