@@ -3,6 +3,44 @@
 # Note: temporarily set update=no to allow simple-vertx build to work
 - name: Clone folio-sample-modules repository
   git: repo=https://github.com/folio-org/folio-sample-modules.git dest={{ folio_sample_modules_src_home }} update=no
+  register: folio_sample_modules_clone
+
+- name: Force Maven build if repository updated
+  file: path={{ folio_sample_modules_src_home }}/{{ item }}/install.log state=absent
+  with_items:
+    - hello-vertx
+    - simple-vertx
+  when: folio_sample_modules_clone.changed
+
+- name: Remove sample modules for tenant if repository updated
+  uri:
+    url: http://localhost:9130/_/proxy/tenants/testlib/modules/{{ item }}
+    method: DELETE
+    status_code: 204, 404
+  with_items:
+    - hello
+    - simple
+  when: folio_sample_modules_clone.changed 
+
+- name: Undeploy sample modules if repo updated
+  uri:
+    url: http://localhost:9130/_/discovery/modules/{{ item }}
+    method: DELETE
+    status_code: 204, 404
+  with_items:
+    - hello
+    - simple
+  when: folio_sample_modules_clone.changed 
+
+- name: Unregister sample modules if repo updated
+  uri:
+    url: http://localhost:9130/_/proxy/modules/{{ item }}
+    method: DELETE
+    status_code: 204, 404
+  with_items:
+    - hello
+    - simple
+  when: folio_sample_modules_clone.changed 
 
 # Temporary hack to simple-vertx pom.xml
 - name: Update simple-vertx pom.xml
