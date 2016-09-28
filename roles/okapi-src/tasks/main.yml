@@ -54,7 +54,7 @@
 
 - name: Launch okapi-core
   become: yes
-  shell: nohup java -Dloglevel=DEBUG -jar {{ okapi_home }}/lib/okapi-core-fat.jar dev > {{ okapi_home }}/logs/okapi.log &
+  shell: nohup java -Dokapiurl="http://{{ ansible_hostname }}:9130" -Dloglevel=DEBUG -jar {{ okapi_home }}/lib/okapi-core-fat.jar dev > {{ okapi_home }}/logs/okapi.log &
   when: okapi_check.stdout == ''
   register: okapi_launch
 

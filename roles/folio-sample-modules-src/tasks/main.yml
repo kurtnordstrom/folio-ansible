@@ -1,6 +1,7 @@
 ---
 # Role to build and deploy folio-sample-modules from source
-# Note: temporarily set update=no to allow simple-vertx build to work
+# Note: temporarily set update=no to allow hello-vertx build to work
+# Waiting for pull request to be merged
 - name: Clone folio-sample-modules repository
   git: repo=https://github.com/folio-org/folio-sample-modules.git dest={{ folio_sample_modules_src_home }} update=no
   register: folio_sample_modules_clone
@@ -42,9 +43,9 @@
     - simple
   when: folio_sample_modules_clone.changed 
 
-# Temporary hack to simple-vertx pom.xml
-- name: Update simple-vertx pom.xml
-  copy: src=simple-vertx-pom.xml dest={{ folio_sample_modules_src_home }}/simple-vertx/pom.xml backup=yes
+# Temporary hack to hello-vertx/pom.xml
+- name: Update hello-vertx pom.xml
+  copy: src=hello-vertx-pom.xml dest={{ folio_sample_modules_src_home }}/hello-vertx/pom.xml backup=yes
 
 - name: Build Java sample modules
   shell: /usr/bin/mvn -q clean install > install.log
@@ -96,6 +97,21 @@
   with_items:
     - { module: hello, index: 0 }
     - { module: simple, index: 1 }
+
+- name: Check testlib tenant
+  uri:
+    url: http://localhost:9130/_/proxy/tenants/testlib
+    status_code: 200, 404
+  register: testlib_status
+
+- name: Create testlib tenant
+  uri:
+    url: http://localhost:9130/_/proxy/tenants
+    method: POST
+    body_format: json
+    body: '{ "id" : "testlib", "name" : "Test Library", "description" : "Our Own Test Library" }'
+    status_code: 201
+  when: testlib_status.status == 404
 
 - name: Enable sample modules for testlib tenant
   uri:
