@@ -31,3 +31,14 @@
   become: yes
   apt: name=docker-engine
 
+- name: Update Docker launch options for TCP connections
+  become: yes
+  lineinfile:
+    dest: /lib/systemd/system/docker.service
+    backup: yes
+    line: ExecStart=/usr/bin/dockerd -H fd:// -H tcp://127.0.0.1:4243
+    regexp: '^ExecStart\=/usr/bin/dockerd -H fd://'
+    backrefs: yes
+  notify:
+    - systemctl daemon-reload
+    - Restart Docker
