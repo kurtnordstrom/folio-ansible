@@ -1,0 +1,44 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+  "builders": [
+    {
+      "name": "folio-demo",
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-2",
+      "source_ami": "ami-0e79236b",
+      "instance_type": "t2.micro",
+      "ssh_username": "admin",
+      "ami_name": "folio-demo {{timestamp}}"
+    },
+    {
+      "name": "folio-backend",
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-2",
+      "source_ami": "ami-0e79236b",
+      "instance_type": "t2.micro",
+      "ssh_username": "admin",
+      "ami_name": "folio-backend {{timestamp}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "playbook_file": "./folio.yml",
+      "host_alias": "build_demo",
+      "only": ["folio-demo"]
+    },
+    {
+      "type": "ansible",
+      "playbook_file": "./folio.yml",
+      "host_alias": "build_backend",
+      "only": ["folio-backend"]
+    }
+  ]
+}
